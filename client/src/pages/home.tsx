@@ -49,6 +49,26 @@ interface CharacterProfile {
   strengths: Array<{ name: string; description: string }>;
   weaknesses: Array<{ name: string; description: string }>;
   abilities: Array<{ name: string; description: string; rarity: string; icon: string }>;
+  aiEnhancements?: {
+    detailed_description: string;
+    growth_potential: string;
+    ethical_perspective: string;
+    life_philosophy: string;
+    career_suggestions: string[];
+    enhanced_strengths: Array<{
+      name: string;
+      original_description: string;
+      ai_enhanced_description: string;
+      category: string;
+    }>;
+    growth_opportunities: Array<{
+      original_weakness: string;
+      growth_area: string;
+      opportunity_description: string;
+      action_steps: string[];
+    }>;
+    ethical_guidelines_applied: string[];
+  };
 }
 
 const iconMap = {
@@ -531,7 +551,7 @@ export default function Home() {
             </div>
 
             {/* AI Enhanced Insights */}
-            {profile.ai_enhancements && (
+            {profile.aiEnhancements && (
               <Card className="shadow-xl border border-purple-200 mb-8 bg-gradient-to-br from-purple-50 to-blue-50">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
@@ -547,7 +567,7 @@ export default function Home() {
                           <Compass className="text-purple-600 mr-2 w-5 h-5" />
                           Life Philosophy
                         </h4>
-                        <p className="text-slate-700 leading-relaxed">{profile.ai_enhancements.life_philosophy}</p>
+                        <p className="text-slate-700 leading-relaxed">{profile.aiEnhancements.life_philosophy}</p>
                       </div>
 
                       <div className="bg-white/70 rounded-xl p-6 border border-purple-200">
@@ -555,7 +575,7 @@ export default function Home() {
                           <Star className="text-purple-600 mr-2 w-5 h-5" />
                           Growth Potential
                         </h4>
-                        <p className="text-slate-700 leading-relaxed">{profile.ai_enhancements.growth_potential}</p>
+                        <p className="text-slate-700 leading-relaxed">{profile.aiEnhancements.growth_potential}</p>
                       </div>
                     </div>
 
@@ -566,7 +586,7 @@ export default function Home() {
                         Ethical Career Paths
                       </h4>
                       <div className="space-y-3">
-                        {profile.ai_enhancements.career_suggestions.map((career, index) => (
+                        {profile.aiEnhancements.career_suggestions.map((career: string, index: number) => (
                           <div key={index} className="flex items-start space-x-3">
                             <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
                             <span className="text-slate-700 text-sm leading-relaxed">{career}</span>
@@ -577,20 +597,20 @@ export default function Home() {
                   </div>
 
                   {/* Growth Opportunities */}
-                  {profile.ai_enhancements.growth_opportunities && profile.ai_enhancements.growth_opportunities.length > 0 && (
+                  {profile.aiEnhancements.growth_opportunities && profile.aiEnhancements.growth_opportunities.length > 0 && (
                     <div className="mt-8 bg-white/70 rounded-xl p-6 border border-purple-200">
                       <h4 className="font-semibold text-slate-800 mb-4 flex items-center">
                         <TriangleAlert className="text-purple-600 mr-2 w-5 h-5" />
                         Growth Opportunities
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {profile.ai_enhancements.growth_opportunities.map((opportunity, index) => (
+                        {profile.aiEnhancements.growth_opportunities.map((opportunity: any, index: number) => (
                           <div key={index} className="space-y-3">
                             <h5 className="font-medium text-slate-800">{opportunity.growth_area}</h5>
                             <p className="text-slate-600 text-sm">{opportunity.opportunity_description}</p>
                             <div className="space-y-1">
                               <p className="text-xs font-medium text-slate-700">Action Steps:</p>
-                              {opportunity.action_steps.map((step, stepIndex) => (
+                              {opportunity.action_steps.map((step: string, stepIndex: number) => (
                                 <div key={stepIndex} className="flex items-center space-x-2">
                                   <div className="w-1 h-1 bg-purple-600 rounded-full"></div>
                                   <span className="text-xs text-slate-600">{step}</span>

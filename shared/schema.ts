@@ -11,6 +11,7 @@ export const characterProfiles = pgTable("character_profiles", {
   strengths: jsonb("strengths").notNull(),
   weaknesses: jsonb("weaknesses").notNull(),
   abilities: jsonb("abilities").notNull(),
+  aiEnhancements: jsonb("ai_enhancements"),
 });
 
 export const insertCharacterProfileSchema = createInsertSchema(characterProfiles).omit({
@@ -46,4 +47,25 @@ export interface PersonalityType {
   name: string;
   description: string;
   icon: string;
+}
+
+export interface AIEnhancements {
+  detailed_description: string;
+  growth_potential: string;
+  ethical_perspective: string;
+  life_philosophy: string;
+  career_suggestions: string[];
+  enhanced_strengths: Array<{
+    name: string;
+    original_description: string;
+    ai_enhanced_description: string;
+    category: string;
+  }>;
+  growth_opportunities: Array<{
+    original_weakness: string;
+    growth_area: string;
+    opportunity_description: string;
+    action_steps: string[];
+  }>;
+  ethical_guidelines_applied: string[];
 }

@@ -1,31 +1,29 @@
 import { characterProfiles, type CharacterProfile, type InsertCharacterProfile } from "@shared/schema";
+import { db } from "./db";
+import { eq, ilike } from "drizzle-orm";
 
 export interface IStorage {
   getCharacterProfile(name: string): Promise<CharacterProfile | undefined>;
   createCharacterProfile(profile: InsertCharacterProfile): Promise<CharacterProfile>;
 }
 
-export class MemStorage implements IStorage {
-  private profiles: Map<string, CharacterProfile>;
-  currentId: number;
-
-  constructor() {
-    this.profiles = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getCharacterProfile(name: string): Promise<CharacterProfile | undefined> {
-    return Array.from(this.profiles.values()).find(
-      (profile) => profile.name.toLowerCase() === name.toLowerCase(),
-    );
+    const [profile] = await db
+      .select()
+      .from(characterProfiles)
+      .where(ilike(characterProfiles.name, name))
+      .limit(1);
+    return profile || undefined;
   }
 
   async createCharacterProfile(insertProfile: InsertCharacterProfile): Promise<CharacterProfile> {
-    const id = this.currentId++;
-    const profile: CharacterProfile = { ...insertProfile, id };
-    this.profiles.set(profile.name.toLowerCase(), profile);
+    const [profile] = await db
+      .insert(characterProfiles)
+      .values(insertProfile)
+      .returning();
     return profile;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
