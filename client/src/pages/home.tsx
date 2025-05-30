@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dna,
@@ -68,13 +69,15 @@ export default function Home() {
   const [name, setName] = useState("");
   const [analysisDepth, setAnalysisDepth] = useState("standard");
   const [characterType, setCharacterType] = useState("balanced");
+  const [useAI, setUseAI] = useState(true);
   const [profile, setProfile] = useState<CharacterProfile | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const { toast } = useToast();
 
   const generateProfileMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const response = await apiRequest("POST", "/api/generate-profile", { name });
+    mutationFn: async (data: { name: string, useAI: boolean }) => {
+      const endpoint = data.useAI ? "/api/generate-enhanced-profile" : "/api/generate-profile";
+      const response = await apiRequest("POST", endpoint, { name: data.name });
       return response.json();
     },
     onSuccess: (data) => {
@@ -123,7 +126,7 @@ export default function Home() {
       });
     }, 200);
 
-    generateProfileMutation.mutate(name);
+    generateProfileMutation.mutate({ name, useAI });
   };
 
   const copyDNASequence = () => {
@@ -294,6 +297,20 @@ export default function Home() {
                             <SelectItem value="artist">Artist Type</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-semibold text-slate-700 mb-1">AI Enhancement</Label>
+                          <p className="text-xs text-slate-600">Generate detailed ethical insights and career suggestions</p>
+                        </div>
+                        <Switch
+                          checked={useAI}
+                          onCheckedChange={setUseAI}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
                       </div>
                     </div>
 

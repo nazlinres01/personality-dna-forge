@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { insertCharacterProfileSchema } from "@shared/schema";
 import { z } from "zod";
 import { createHash } from "crypto";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import path from "path";
 
 // DNA generation algorithm
 function generateDNASequence(name: string): string {
@@ -121,6 +124,38 @@ function generateAbilities(stats: any, name: string) {
   return selectedAbilities;
 }
 
+// AI Enhancement function using Python script
+async function enhanceCharacterWithAI(characterData: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(process.cwd(), 'server', 'ai-enhancer.py');
+    const python = spawn('python3', [pythonScript, JSON.stringify(characterData)]);
+    
+    let output = '';
+    let errorOutput = '';
+    
+    python.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+    
+    python.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+    
+    python.on('close', (code) => {
+      if (code === 0) {
+        try {
+          const enhancedData = JSON.parse(output);
+          resolve(enhancedData);
+        } catch (parseError) {
+          reject(new Error('Failed to parse AI enhancement output'));
+        }
+      } else {
+        reject(new Error(`AI enhancement failed: ${errorOutput}`));
+      }
+    });
+  });
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Generate character profile
@@ -153,6 +188,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const profile = await storage.createCharacterProfile(profileData);
       res.json(profile);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  // Enhanced AI character profile generation
+  app.post("/api/generate-enhanced-profile", async (req, res) => {
+    try {
+      const { name } = z.object({ name: z.string().min(2).max(50) }).parse(req.body);
+      
+      // Check if profile already exists
+      const existingProfile = await storage.getCharacterProfile(name);
+      if (existingProfile) {
+        // Try to enhance existing profile with AI
+        try {
+          const enhancedProfile = await enhanceCharacterWithAI(existingProfile);
+          return res.json(enhancedProfile);
+        } catch (aiError) {
+          // Fall back to basic profile if AI enhancement fails
+          return res.json(existingProfile);
+        }
+      }
+
+      // Generate new profile
+      const dnaSequence = generateDNASequence(name);
+      const stats = generateStats(name);
+      const personalityType = getPersonalityType(stats);
+      const { strengths, weaknesses } = generateTraits(stats, personalityType);
+      const abilities = generateAbilities(stats, name);
+
+      const profileData = {
+        name,
+        dnaSequence,
+        personalityType: personalityType.name,
+        stats,
+        strengths,
+        weaknesses,
+        abilities,
+      };
+
+      const profile = await storage.createCharacterProfile(profileData);
+      
+      // Enhance with AI
+      try {
+        const enhancedProfile = await enhanceCharacterWithAI(profile);
+        res.json(enhancedProfile);
+      } catch (aiError) {
+        // Fall back to basic profile if AI enhancement fails
+        res.json(profile);
+      }
     } catch (error) {
       res.status(400).json({ error: "Invalid request data" });
     }
