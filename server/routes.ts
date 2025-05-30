@@ -227,6 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         strengths,
         weaknesses,
         abilities,
+        aiEnhancements: null,
       };
 
       const profile = await storage.createCharacterProfile(profileData);
