@@ -2,6 +2,10 @@
 
 A web application that generates unique DNA sequences and RPG-style character profiles based on user names, enhanced with ethical AI insights.
 
+
+![Resim5](https://github.com/user-attachments/assets/4c463eee-9c24-4c67-86fd-feb0c6dfdc30)
+
+
 ## Features
 
 - **DNA Generation**: Creates unique genetic sequences using SHA-256 algorithms
